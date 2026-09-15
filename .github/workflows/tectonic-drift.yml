@@ -15,7 +15,16 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --no-save || npm install
+      - name: Install dependencies (if any)
+        # This repo is stdlib-only (node builtins); there is no package.json.
+        # Skip the install instead of failing when none exists, so a future
+        # package.json still gets installed.
+        run: |
+          if [ -f package.json ]; then
+            bun install --no-save || npm install
+          else
+            echo "no package.json; skipping install (stdlib-only project)"
+          fi
       - name: Analyze drift
         run: |
           node -e "
